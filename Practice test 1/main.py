@@ -1,8 +1,16 @@
+"""
+Pratice test #1. Implementation of FPG.   
+                                          
+Student:  Danis Alukaev                   
+Email:    d.alukaev@innopolis.university  
+Group:    B19-DS-01                       
+"""
+
 import sys
+import os
 from enum import Enum
 import random
-from turtle import pos, position
-from tqdm import tqdm
+import datetime
 
 
 class Mode(Enum):
@@ -16,16 +24,59 @@ class Turn(Enum):
     SPOILER = -1
 
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Function used to display progress bar.
+    Giving credits to https://stackoverflow.com/a/34325723.
+    """
+    
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    if iteration == total: 
+        print()
+
+
+def prompt_string(message, warning, answers):
+    """
+    Function used to prompt user for an configuration.
+    Handles string answers. Tolerable to user mistakes.
+    """
+
+    print(message)
+    answer = input().lower()
+    while answer not in answers:
+        print(warning, message)
+        answer = input().lower()
+    return answer
+
+
+def prompt_numeric(message, warning, interval):
+    """
+    Function used to prompt user for an configuration.
+    Handles numeric answers. Tolerable to user mistakes.
+    """
+
+    print(message)
+    answer = input()
+    while not answer.isnumeric() or int(answer) not in interval:
+        print(warning, message)
+        answer = input()
+    return int(answer)
+
+
 class Logger:
     """
-    The class used to log the progress of the game.
+    Class used to log the progress of the game.
     Allows to redirect stdout to specified file: the result of method print will
     be both displayed in the terminal and appended to log file.
     """
 
-    def __init__(self, filename='games.log'):
+    def __init__(self, logs_dir, filename):
         self.filename = filename
-        self.log = open(filename, 'a')
+        filepath = os.path.join(logs_dir, filename)
+        self.log = open(filepath, 'a')
         self.cli = sys.stdout
     
     def write(self, string):
@@ -36,6 +87,22 @@ class Logger:
         pass
 
 
+class SessionLogger:
+    """
+    Class used to log the progress of a particular games session.
+    Stores logs in local directory ./logs.
+    """
+
+    def __init__(self, logs_dir, date, play):
+        self.logs_dir = logs_dir
+        self.filename = f"Session {date} play {play}.log"
+    
+    def write(self, string):
+        filepath = os.path.join(self.logs_dir, self.filename)
+        with open(filepath, 'a') as f:
+            f.write(string)
+
+
 class Analyzer:
     """
     The class used to determine the positions with a winning strategy (acceptable positions). 
@@ -44,7 +111,7 @@ class Analyzer:
     q is not a final position, and any opponent move leads to winning strategy.
     """
 
-    def __init__(self, day, month, year):
+    def __init__(self, day, month, year, progress_bar=True):
         self.day, self.month, self.year = day, month, year
         self.winning_position = day + month + year
 
@@ -52,18 +119,19 @@ class Analyzer:
         self.acceptable_positions = [self.winning_position - move for move in self.possible_moves]
         self.suggested_moves = {position: [] for position in range(1, self.winning_position)}
 
-        self.message_analyzing = "Analyzing the game..."
+        self.message_analyzing = "Analyzing the game. It takes 10 seconds on average."
         self.message_no_winning_strategy = "\nYou don't have any winning strategy. Return random move."
-        self.__run()
+        self.__run(progress_bar)
     
-    def __run(self):
+    def __run(self, progress_bar):
         fix_points = self.acceptable_positions[:]
         offsets = {i: [i + j for j in self.possible_moves] for i in self.possible_moves}
         for position, move in zip(self.acceptable_positions, self.possible_moves):
             self.suggested_moves[position].append(move)
 
         print(self.message_analyzing)
-        for position in tqdm(range(1, self.winning_position)[::-1]):
+        printProgressBar(0, len(range(1, self.winning_position)), prefix = 'Progress:', suffix = 'Complete', length = 50)
+        for position in range(1, self.winning_position)[::-1]:
             if position in self.acceptable_positions:
                 continue
             for move in self.possible_moves:
@@ -78,6 +146,10 @@ class Analyzer:
                     fix_points.append(position)
                     self.suggested_moves[position].append(move)
 
+            if progress_bar:
+                idx = self.winning_position - (position + 1)
+                printProgressBar(idx + 1, len(range(1, self.winning_position)), prefix = 'Progress:', suffix = 'Complete', length = 50)
+
         self.acceptable_positions = fix_points
         return fix_points
     
@@ -87,33 +159,16 @@ class Analyzer:
         return random.choice(self.possible_moves), self.message_no_winning_strategy
 
 
-def prompt_string(message, warning, answers):
-    print(message)
-    answer = input().lower()
-    while answer not in answers:
-        print(warning, message)
-        answer = input().lower()
-    return answer
-
-
-def prompt_numeric(message, warning, interval):
-    print(message)
-    answer = input()
-    while not answer.isnumeric() or int(answer) not in interval:
-        print(warning, message)
-        answer = input()
-    return int(answer)
-
-
 class Configuration:
     """
     The class used to configure game routines such as prompting the user, setting up logging, etc.
     Can be used as a base class for new FPG games.
     """
 
-    def __init__(self, day, month, year, filename="games.log"):
+    def __init__(self, day, month, year, filename="output.log", logs_dir='./logs'):
         self.day, self.month, self.year = day, month, year
         self.filename = filename
+        self.logs_dir = logs_dir
 
         self.number_games_played = 0
         self.winning_position = day + month + year
@@ -142,7 +197,9 @@ class Configuration:
         self.__setup_logging()
 
     def __setup_logging(self):
-        sys.stdout = Logger(self.filename)
+        if not os.path.exists(self.logs_dir):
+            os.mkdir(self.logs_dir)
+        sys.stdout = Logger(self.logs_dir, self.filename)
 
     def __start(self):
         needs_game = {"y": True, "n": False}
@@ -185,6 +242,7 @@ Final position:\t\t{self.winning_position}
 Playing mode:\t\t{self.mode.name}\n
 ----------------------------------\n"""
 
+
 class Spoiler:
     """
     Class implementing opponent's behaviour. 
@@ -220,6 +278,15 @@ class Spoiler:
 
 
 class Game(Configuration):
+    """
+    The class used to create interactive game sessions.
+    Contains instances of classes Spoiler and Analyzer.
+    On each start prompts user to specify whether he/she wants to use 
+    random starting position or select by his/her own. Further, it asks
+    to choose the playing mode. Currently, supported three modes: smart, 
+    random, and advisor (see Configuration class). 
+    """
+
     def __init__(self, day=12, month=11, year=2001):
         # TODO: logging for each game
 
@@ -237,11 +304,10 @@ class Game(Configuration):
             message += f" Advisor suggestion is +{suggestion}."
         answer = prompt_numeric(message, self.message_wrong_move, range(1, max(self.possible_moves) + 1))
         while position + answer > self.analyzer.winning_position:
-            message = self.message_impossible_position + message
-            answer = prompt_numeric(message, self.message_wrong_move, range(1, max(self.possible_moves) + 1))
+            answer = prompt_numeric(self.message_impossible_position + message, self.message_wrong_move, range(1, max(self.possible_moves) + 1))
         return answer
     
-    def __start_session(self):
+    def __start_session(self, session_logger):
         turn = Turn.DUPLICATOR
         make_move = {Turn.DUPLICATOR: self.__prompt_move, Turn.SPOILER: self.spoiler.make_move}
         player = {Turn.DUPLICATOR: "Duplicator", Turn.SPOILER: "Spoiler"}
@@ -249,8 +315,10 @@ class Game(Configuration):
             move = make_move[turn](self.position)
             self.position += move
             print(f"\n{player[turn]} makes move +{move}: {self.position - move} -> {self.position}")
+            session_logger.write(f"\n{player[turn]}:\t{self.position - move} -> {self.position} (+{move})")
             if self.position == self.winning_position:
                 print(f"{player[turn]} wins!")
+                session_logger.write(f"\n{player[turn]} wins!")
                 break
             turn = Turn(-turn.value)
 
@@ -258,12 +326,20 @@ class Game(Configuration):
         try:
             self.analyzer = Analyzer(self.day, self.month, self.year)
             self.spoiler = Spoiler(self.analyzer)
+
+            session_started = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             while self.start():
+                session_logger = SessionLogger(self.logs_dir, session_started, self.number_games_played)
+
                 print(f"\nGame session #{self.number_games_played} started.")
                 self.position, mode = self.configure()
-                print(self.__str__())
+
+                configs = self.__str__()
+                print(configs)
+                session_logger.write(configs)
+
                 self.spoiler.set_mode(mode)
-                self.__start_session()
+                self.__start_session(session_logger)
         except KeyboardInterrupt:
             pass
 
