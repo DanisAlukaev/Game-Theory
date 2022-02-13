@@ -13,7 +13,6 @@ from enum import Enum
 import random
 import datetime
 from argparse import ArgumentParser
-from tkinter import N
 
 
 class Mode(Enum):
@@ -209,7 +208,7 @@ class Configuration:
         self.message_wrong_answer_polar_question = "\nThe answer is either 'Y' or 'N'.\nTry again:"
 
         self.message_ask_option_starting_position = "Select starting position at random? [Y/N]"
-        self.message_ask_starting_position = f"\nSpecify starting position in the range [{1}..{self.winning_position-1}]"
+        self.message_ask_starting_position = f"\nSpecify starting position in the range [{1}..{self.winning_position}]"
         self.message_wrong_starting_position = f"\nThe starting position should be numeric and belong to [{1}..{self.winning_position-1}]. Try again:"
 
         self.message_current_position = "\nCurrent position is "
@@ -242,8 +241,8 @@ class Configuration:
     def __configure_starting_position(self):
         answer = prompt_string(self.message_ask_option_starting_position, self.message_wrong_answer_polar_question, ["y", "n"])
         if answer == "y":
-            return random.randint(1, self.winning_position - 1)
-        answer = prompt_numeric(self.message_ask_starting_position, self.message_wrong_starting_position, range(1, self.winning_position))
+            return random.randint(1, self.winning_position)
+        answer = prompt_numeric(self.message_ask_starting_position, self.message_wrong_starting_position, range(1, self.winning_position + 1))
         self.starting_position = answer
         return self.starting_position
 
@@ -340,6 +339,12 @@ class Game(Configuration):
         turn = Turn.DUPLICATOR
         make_move = {Turn.DUPLICATOR: self.__prompt_move, Turn.SPOILER: self.spoiler.make_move}
         player = {Turn.DUPLICATOR: "Duplicator", Turn.SPOILER: "Spoiler"}
+
+        if self.position == self.winning_position:
+            print(f"{player[turn]} wins!")
+            session_logger.write(f"\n{player[turn]} wins!")
+            return
+
         while True:
             move = make_move[turn](self.position)
             self.position += move

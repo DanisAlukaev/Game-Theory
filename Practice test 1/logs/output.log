@@ -1,0 +1,80 @@
+Analyzing the game. It takes 10 seconds on average.
+Progress: |--------------------------------------------------| 0.0% CompleteProgress: |██------------------------------------------------| 4.9% CompleteProgress: |████----------------------------------------------| 9.9% CompleteProgress: |███████-------------------------------------------| 14.8% CompleteProgress: |█████████-----------------------------------------| 19.8% CompleteProgress: |████████████--------------------------------------| 24.7% CompleteProgress: |██████████████------------------------------------| 29.7% CompleteProgress: |█████████████████---------------------------------| 34.6% CompleteProgress: |███████████████████-------------------------------| 39.5% CompleteProgress: |██████████████████████----------------------------| 44.5% CompleteProgress: |████████████████████████--------------------------| 49.4% CompleteProgress: |███████████████████████████-----------------------| 54.4% CompleteProgress: |█████████████████████████████---------------------| 59.3% CompleteProgress: |████████████████████████████████------------------| 64.3% CompleteProgress: |██████████████████████████████████----------------| 69.2% CompleteProgress: |█████████████████████████████████████-------------| 74.1% CompleteProgress: |███████████████████████████████████████-----------| 79.1% CompleteProgress: |██████████████████████████████████████████--------| 84.0% CompleteProgress: |████████████████████████████████████████████------| 89.0% CompleteProgress: |██████████████████████████████████████████████----| 93.9% CompleteProgress: |█████████████████████████████████████████████████-| 98.9% CompleteProgress: |██████████████████████████████████████████████████| 100.0% Complete
+
+Game session #1 started.
+Select starting position at random? [Y/N]
+N
+
+Specify starting position in the range [1..2024]
+2000
+
+Choose the playing mode [1,2,3]:
+[1] Smart (program uses a winning strategy)
+[2] Random (program makes random moves)
+[3] Advisor (program advises a winning strategy)
+3
+
+----------CONFIGURATIONS----------
+
+Possible positions:	[1..2023]
+Possbile moves:		[1..23]
+Starting position:	2000
+Final position:		2024
+Playing mode:		ADVISOR
+
+----------------------------------
+
+
+Current position is 2000. Choose a move in the range of [1..23].
+You don't have any winning strategy. Return random move. Advisor suggestion is +21.
+21
+
+Duplicator makes move +21: 2000 -> 2021
+
+Spoiler makes move +3: 2021 -> 2024
+Spoiler wins!
+
+Do you want to play again? [Y/N]
+Y
+
+Game session #2 started.
+Select starting position at random? [Y/N]
+N
+
+Specify starting position in the range [1..2024]
+1999
+
+Choose the playing mode [1,2,3]:
+[1] Smart (program uses a winning strategy)
+[2] Random (program makes random moves)
+[3] Advisor (program advises a winning strategy)
+3
+
+----------CONFIGURATIONS----------
+
+Possible positions:	[1..2023]
+Possbile moves:		[1..23]
+Starting position:	1999
+Final position:		2024
+Playing mode:		ADVISOR
+
+----------------------------------
+
+
+Current position is 1999. Choose a move in the range of [1..23]. Advisor suggestion is +1.
+1
+
+Duplicator makes move +1: 1999 -> 2000
+
+Spoiler makes move +1: 2000 -> 2001
+
+Current position is 2001. Choose a move in the range of [1..23]. Advisor suggestion is +23.
+23
+
+Duplicator makes move +23: 2001 -> 2024
+Duplicator wins!
+
+Do you want to play again? [Y/N]
+N
+
+The program was terminated.

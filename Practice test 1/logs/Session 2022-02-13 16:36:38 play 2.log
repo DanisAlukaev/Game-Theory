@@ -1,0 +1,15 @@
+
+----------CONFIGURATIONS----------
+
+Possible positions:	[1..2023]
+Possbile moves:		[1..23]
+Starting position:	1999
+Final position:		2024
+Playing mode:		ADVISOR
+
+----------------------------------
+
+Duplicator:	1999 -> 2000 (+1)
+Spoiler:	2000 -> 2001 (+1)
+Duplicator:	2001 -> 2024 (+23)
+Duplicator wins!
