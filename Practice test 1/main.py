@@ -1,9 +1,10 @@
 """
 Pratice test #1. Implementation of FPG.   
                                           
-Student:  Danis Alukaev                   
-Email:    d.alukaev@innopolis.university  
-Group:    B19-DS-01                       
+Student:    Danis Alukaev   
+Birthday:   12.11.2001        
+Email:      d.alukaev@innopolis.university  
+Group:      B19-DS-01                       
 """
 
 import sys
