@@ -316,8 +316,6 @@ class Game(Configuration):
     """
 
     def __init__(self, day=12, month=11, year=2001):
-        # TODO: logging for each game
-
         Configuration.__init__(self, day, month, year)
         self.position = None
         self.spoiler = None
@@ -365,7 +363,7 @@ class Game(Configuration):
             while self.start():
                 session_logger = SessionLogger(self.logs_dir, session_started, self.number_games_played)
 
-                print(f"\nGame session #{self.number_games_played} started.")
+                print(f"\nGame #{self.number_games_played} started.")
                 self.position, mode = self.configure()
 
                 configs = self.__str__()
