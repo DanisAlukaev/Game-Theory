@@ -12,6 +12,8 @@ import os
 from enum import Enum
 import random
 import datetime
+from argparse import ArgumentParser
+from tkinter import N
 
 
 class Mode(Enum):
@@ -23,6 +25,20 @@ class Mode(Enum):
 class Turn(Enum):
     DUPLICATOR = 1
     SPOILER = -1
+
+
+def get_arguments():
+    """
+    Function used to parse arguments from command line interface.
+    """
+    parser = ArgumentParser()
+    parser.add_argument("-b", "--birthday", dest="date", help="birthday in dd.mm.yyyy format, e.g. for Nov 12 it will be 12.11.2001")
+
+    args = parser.parse_args()
+    if args.date:
+        day, month, year = map(lambda x: int(x), args.date.split('.'))
+        return {'day': day, 'month': month, 'year': year}
+    return {}
 
 
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
@@ -80,9 +96,20 @@ class Logger:
         self.log = open(filepath, 'a')
         self.cli = sys.stdout
     
+    def __del__(self):
+        sys.stdout = sys.__stdout__
+        sys.stdir = sys.__stdin__
+        sys.stderr = sys.__stderr__
+        self.log.close()
+    
     def write(self, string):
         self.cli.write(string)
         self.log.write(string)
+    
+    def readline(self):
+        string = sys.__stdin__.readline()
+        self.log.write(string)
+        return string
     
     def flush(self):
         pass
@@ -147,10 +174,11 @@ class Analyzer:
                     fix_points.append(position)
                     self.suggested_moves[position].append(move)
 
-            if progress_bar:
-                idx = self.winning_position - (position + 1)
+            idx = self.winning_position - (position + 1)
+            if progress_bar and (idx + 1) % 100 == 0:
                 printProgressBar(idx + 1, len(range(1, self.winning_position)), prefix = 'Progress:', suffix = 'Complete', length = 50)
 
+        printProgressBar(idx + 1, len(range(1, self.winning_position)), prefix = 'Progress:', suffix = 'Complete', length = 50)
         self.acceptable_positions = fix_points
         return fix_points
     
@@ -200,7 +228,7 @@ class Configuration:
     def __setup_logging(self):
         if not os.path.exists(self.logs_dir):
             os.mkdir(self.logs_dir)
-        sys.stdout = Logger(self.logs_dir, self.filename)
+        sys.stdout = sys.stdin = sys.stderr = Logger(self.logs_dir, self.filename)
 
     def __start(self):
         needs_game = {"y": True, "n": False}
@@ -351,5 +379,5 @@ class Game(Configuration):
     
 
 if __name__ == "__main__":
-    game = Game()
+    game = Game(**get_arguments())
     game.run()
